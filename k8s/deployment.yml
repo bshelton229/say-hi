@@ -1,0 +1,27 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: say-hi
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: say-hi
+    spec:
+      containers:
+      - name: say-hi
+        image: bshelton229/say-hi:latest
+        env:
+          - name: PORT
+            valueFrom:
+              configMapKeyRef:
+                name: say-hi
+                key: port
+          - name: ENV_MESSAGE
+            valueFrom:
+              configMapKeyRef:
+                name: say-hi
+                key: message
+        ports:
+          - containerPort: 80

@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: say-hi-investigate
+spec:
+  restartPolicy: Never
+  containers:
+  - name: say-hi
+    image: bshelton229/say-hi:broken
+    env:
+      - name: PORT
+        valueFrom:
+          configMapKeyRef:
+            name: say-hi
+            key: port
+      - name: ENV_MESSAGE
+        valueFrom:
+          configMapKeyRef:
+            name: say-hi
+            key: message
+    ports:
+    - containerPort: 80
