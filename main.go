@@ -43,6 +43,12 @@ func main() {
 
 	mux := http.NewServeMux()
 
+	mux.Handle("/down", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		io.WriteString(w, `{"msg":"Danger!"}`)
+	}))
+
 	mux.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		msg := Output{
@@ -53,7 +59,7 @@ func main() {
 		output, err := json.Marshal(msg)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
-			io.WriteString(w, `{"error": true}`)
+			io.WriteString(w, `{"error":true}`)
 			return
 		}
 		log.Printf("Serving request to %s\n", r.URL)
