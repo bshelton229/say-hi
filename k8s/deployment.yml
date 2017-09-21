@@ -11,7 +11,7 @@ spec:
     spec:
       containers:
       - name: say-hi
-        image: bshelton229/say-hi:latest
+        image: quay.io/bshelton229/say-hi:latest
         env:
           - name: PORT
             valueFrom:
