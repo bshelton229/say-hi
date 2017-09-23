@@ -9,4 +9,4 @@ deploy:
 	docker push quay.io/bshelton229/say-hi:latest
 
 run:
-	docker run --rm -it -P $(ECR):latest
+	docker run --rm -it -P say-hi:latest
