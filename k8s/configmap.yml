@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: say-hi
-  namespace: default
+  namespace: say-hi
 data:
   message: "Hello!"
   port: "80"
