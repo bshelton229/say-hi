@@ -8,6 +8,8 @@ spec:
     metadata:
       labels:
         app: say-hi
+      annotations:
+        version: "1"
     spec:
       containers:
       - name: say-hi
