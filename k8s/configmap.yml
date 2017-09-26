@@ -2,7 +2,10 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: say-hi
-  namespace: say-hi
 data:
   message: "Hello!"
   port: "80"
+  config.json: |
+    {
+      "max_conn": 100
+    }
