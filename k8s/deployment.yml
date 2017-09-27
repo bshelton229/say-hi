@@ -26,11 +26,6 @@ spec:
               configMapKeyRef:
                 name: say-hi
                 key: port
-          - name: ENV_MESSAGE
-            valueFrom:
-              configMapKeyRef:
-                name: say-hi
-                key: message
         livenessProbe:
           httpGet:
             path: /

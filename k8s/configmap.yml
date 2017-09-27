@@ -3,7 +3,7 @@ kind: ConfigMap
 metadata:
   name: say-hi
 data:
-  message: "Hello!"
+  message: "Hello World!"
   port: "80"
   config.json: |
     {

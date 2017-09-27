@@ -5,12 +5,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"math/rand"
 	"net/http"
 	"os"
 	"os/signal"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -20,6 +22,14 @@ func getenv(key, fallback string) string {
 		return fallback
 	}
 	return value
+}
+
+func getMessage() string {
+	content, err := ioutil.ReadFile("/etc/my-config/message")
+	if err != nil {
+		return getenv("ENV_MESSAGE", "Hello")
+	}
+	return strings.TrimSpace(string(content))
 }
 
 func getHostID() int {
@@ -54,7 +64,7 @@ func main() {
 		msg := Output{
 			Hello:   "World!",
 			NodeID:  strconv.Itoa(hostID),
-			Message: getenv("ENV_MESSAGE", "Hello"),
+			Message: getMessage(),
 		}
 		output, err := json.Marshal(msg)
 		if err != nil {
