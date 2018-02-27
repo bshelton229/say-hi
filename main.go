@@ -27,7 +27,7 @@ func getenv(key, fallback string) string {
 func getMessage() string {
 	content, err := ioutil.ReadFile("/etc/my-config/message")
 	if err != nil {
-		return getenv("ENV_MESSAGE", "Hello")
+		return getenv("MESSAGE", "Hello")
 	}
 	return strings.TrimSpace(string(content))
 }
