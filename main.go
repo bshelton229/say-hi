@@ -40,9 +40,10 @@ func getHostID() int {
 
 // Output json struct
 type Output struct {
-	Hello   string `json:"hello"`
-	NodeID  string `json:"node_id"`
-	Message string `json:"message"`
+	Hello             string `json:"hello"`
+	NodeID            string `json:"node_id"`
+	Message           string `json:"message"`
+	AdditionalMessage string `json:"additional_message"`
 }
 
 func main() {
@@ -62,9 +63,10 @@ func main() {
 	mux.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		msg := Output{
-			Hello:   "World!",
-			NodeID:  strconv.Itoa(hostID),
-			Message: getMessage(),
+			Hello:             "World!",
+			NodeID:            strconv.Itoa(hostID),
+			Message:           getMessage(),
+			AdditionalMessage: "Added message",
 		}
 		output, err := json.Marshal(msg)
 		if err != nil {
