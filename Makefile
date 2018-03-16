@@ -12,3 +12,6 @@ deploy:
 
 run:
 	docker run --rm -it -P say-hi:latest
+
+shell:
+	docker run --rm -it -P say-hi:latest bash
