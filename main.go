@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -40,10 +41,12 @@ func getHostID() int {
 
 // Output json struct
 type Output struct {
-	Hello             string `json:"hello"`
-	NodeID            string `json:"node_id"`
-	Message           string `json:"message"`
-	AdditionalMessage string `json:"additional_message"`
+	Hello             string            `json:"hello"`
+	NodeID            string            `json:"node_id"`
+	Message           string            `json:"message"`
+	AdditionalMessage string            `json:"additional_message"`
+	RequestHeaders    map[string]string `json:"request_headers"`
+	SayHiEnv          map[string]string `json:"say_hi_env"`
 }
 
 func main() {
@@ -62,11 +65,30 @@ func main() {
 
 	mux.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
+		headerOut := map[string]string{}
+		envOut := map[string]string{}
+		cookieReg := regexp.MustCompile("(?i)(cookie)")
+
+		for k, v := range r.Header {
+			if !cookieReg.MatchString(k) {
+				headerOut[k] = v[0]
+			}
+		}
+
+		for _, v := range os.Environ() {
+			if strings.HasPrefix(v, "SAY_HI_") {
+				parsed := strings.SplitN(v, "=", 2)
+				envOut[parsed[0]] = parsed[1]
+			}
+		}
+
 		msg := Output{
 			Hello:             "World!",
 			NodeID:            strconv.Itoa(hostID),
 			Message:           getMessage(),
 			AdditionalMessage: "Added message",
+			RequestHeaders:    headerOut,
+			SayHiEnv:          envOut,
 		}
 		output, err := json.Marshal(msg)
 		if err != nil {
