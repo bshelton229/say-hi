@@ -76,7 +76,7 @@ func main() {
 		}
 
 		for _, v := range os.Environ() {
-			if strings.HasPrefix(v, "SAY_HI_") {
+			if strings.HasPrefix(v, "SAY_HI_ENV_") {
 				parsed := strings.SplitN(v, "=", 2)
 				envOut[parsed[0]] = parsed[1]
 			}
