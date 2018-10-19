@@ -3,9 +3,8 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"fmt"
+	"flag"
 	"io"
-	"io/ioutil"
 	"log"
 	"math/rand"
 	"net/http"
@@ -25,15 +24,7 @@ func getenv(key, fallback string) string {
 	return value
 }
 
-func getMessage() string {
-	content, err := ioutil.ReadFile("/etc/my-config/message")
-	if err != nil {
-		return getenv("MESSAGE", "Hello")
-	}
-	return strings.TrimSpace(string(content))
-}
-
-func getHostID() int {
+func generateID() int {
 	rand.Seed(time.Now().UTC().UnixNano())
 	out := rand.Int()
 	return out
@@ -42,25 +33,21 @@ func getHostID() int {
 // Output json struct
 type Output struct {
 	Hello             string            `json:"hello"`
-	NodeID            string            `json:"node_id"`
-	Message           string            `json:"message"`
+	GeneratedID       string            `json:"generated_id"`
 	AdditionalMessage string            `json:"additional_message"`
 	RequestHeaders    map[string]string `json:"request_headers"`
 	SayHiEnv          map[string]string `json:"say_hi_env"`
 }
 
 func main() {
-	// subscribe to SIGINT signals
-	stopChan := make(chan os.Signal)
-	signal.Notify(stopChan, os.Interrupt)
-	hostID := getHostID()
+	generatedID := generateID()
 
 	mux := http.NewServeMux()
 
 	mux.Handle("/down", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
-		io.WriteString(w, `{"msg":"Danger!"}`)
+		io.WriteString(w, `{"msg":"DOWN!"}`)
 	}))
 
 	mux.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -75,6 +62,7 @@ func main() {
 			}
 		}
 
+		// Build up map of env vars starting with SAY_HI_ENV_
 		for _, v := range os.Environ() {
 			if strings.HasPrefix(v, "SAY_HI_ENV_") {
 				parsed := strings.SplitN(v, "=", 2)
@@ -84,25 +72,29 @@ func main() {
 
 		msg := Output{
 			Hello:             "World!",
-			NodeID:            strconv.Itoa(hostID),
-			Message:           getMessage(),
+			GeneratedID:       strconv.Itoa(generateID),
 			AdditionalMessage: "Added message",
 			RequestHeaders:    headerOut,
 			SayHiEnv:          envOut,
 		}
 		output, err := json.Marshal(msg)
+
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			io.WriteString(w, `{"error":true}`)
 			return
 		}
+
 		log.Printf("Serving request to %s\n", r.URL)
 		io.WriteString(w, string(output))
 	}))
 
-	addr := getenv("PORT", "8082")
-	srv := &http.Server{Addr: fmt.Sprintf(":%s", addr), Handler: mux}
-	log.Println("Listening on port", addr)
+	var listen string
+	flag.StringVar(&listen, "listen", "0.0.0.0:8082", "Listen string")
+	flag.Parse()
+
+	srv := &http.Server{Addr: listen, Handler: mux}
+	log.Println("Listening on ", listen)
 
 	go func() {
 		// service connections
@@ -111,6 +103,9 @@ func main() {
 		}
 	}()
 
+	// subscribe to SIGINT signals
+	stopChan := make(chan os.Signal)
+	signal.Notify(stopChan, os.Interrupt)
 	<-stopChan // wait for SIGINT
 	log.Println("Shutting down server...")
 
@@ -119,5 +114,4 @@ func main() {
 	srv.Shutdown(ctx)
 
 	log.Println("Server gracefully stopped")
-
 }
