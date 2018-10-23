@@ -13,6 +13,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"syscall"
 	"time"
 )
 
@@ -72,7 +73,7 @@ func main() {
 
 		msg := Output{
 			Hello:             "World!",
-			GeneratedID:       strconv.Itoa(generateID),
+			GeneratedID:       strconv.Itoa(generatedID),
 			AdditionalMessage: "Added message",
 			RequestHeaders:    headerOut,
 			SayHiEnv:          envOut,
@@ -105,7 +106,7 @@ func main() {
 
 	// subscribe to SIGINT signals
 	stopChan := make(chan os.Signal)
-	signal.Notify(stopChan, os.Interrupt)
+	signal.Notify(stopChan, os.Interrupt, syscall.SIGTERM)
 	<-stopChan // wait for SIGINT
 	log.Println("Shutting down server...")
 
