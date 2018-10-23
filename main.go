@@ -15,6 +15,8 @@ import (
 	"strings"
 	"syscall"
 	"time"
+
+	"github.com/gorilla/handlers"
 )
 
 func getenv(key, fallback string) string {
@@ -86,7 +88,7 @@ func main() {
 			return
 		}
 
-		log.Printf("Serving request to %s\n", r.URL)
+		log.Printf("Serving request to %s - %s\n", r.URL, r.Header.Get("X-Request-ID"))
 		io.WriteString(w, string(output))
 	}))
 
@@ -94,7 +96,8 @@ func main() {
 	flag.StringVar(&listen, "listen", "0.0.0.0:8082", "Listen string")
 	flag.Parse()
 
-	srv := &http.Server{Addr: listen, Handler: mux}
+	loggedRouter := handlers.LoggingHandler(os.Stdout, mux)
+	srv := &http.Server{Addr: listen, Handler: loggedRouter}
 	log.Println("Listening on ", listen)
 
 	go func() {
